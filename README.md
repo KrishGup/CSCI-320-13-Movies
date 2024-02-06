@@ -2,5 +2,5 @@
 This is  true cinema
 
 Authors:
-Zach Brown, Simon Martin
+Zach Brown, Simon Martin, Krish Gupta
 ... add names here
