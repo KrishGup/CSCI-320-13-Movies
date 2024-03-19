@@ -80,6 +80,7 @@ Use this section to include sample of entities for every entity type in your EER
 Include 5 samples for every entity type and relationship type.
 
 Samples of the entity type \emph{Movie} (title, genre, runtime, movie ID, MPAA rating) are as follows:
+/begin{itemize}
 \emph{The Dark Knight}, Action, 2h 32m, MOVIE ID, PG-13
 \emph{Dune}, Sci-Fi, 2h 48m, MOVIE ID, PG-13
 \emph{Peppa Pig: My First Cinema Experience}, Adventure, 1h 13m, MOVIE ID, G
@@ -104,74 +105,74 @@ Samples of the entity type \emph{User} (username, password, first_name, last_nam
 \emph{ChuckMcGill}, \emph{Magna_Carta}, Charles, McGill 
 \emph{Markiplier}, \emph{Bite_of_87}, Mark, Fischbach
 
-\section{Implementation}
-Use this section to describe the overall implementation of your database. Include samples of SQL statements to create the tables (DDL statements) and a description of the ETL process, including examples of the SQL insert statements used to populate each table initially.
+% \section{Implementation}
+% Use this section to describe the overall implementation of your database. Include samples of SQL statements to create the tables (DDL statements) and a description of the ETL process, including examples of the SQL insert statements used to populate each table initially.
 
-Include also sample of the SQL insert statements used in your application program to insert new data in the database. Finally, add an appendix of all the SQL statements created in your application during Phase 4 and a description of the indexes created to boost the performance of your application.
-\section{Data Analysis}
-\subsection{Hypothesis}
-Use this section to state the objectives of your data analysis; what are the observations you are expecting to find. Note that your final
-observations may end up differing from your proposal, that is also a valid result.
-\subsection{Data Preprocessing}
-Use this section to describe the preprocessing steps you have performed to prepare the data for the analytics. Preprocessing steps may include: data cleaning (e.g., filling missing values, fixing outliers), formatting the data (e.g., resolving issues like inconsistent abbreviations, multiples date format in the data), combining or splitting fields, add new information (data enrichness).
+% Include also sample of the SQL insert statements used in your application program to insert new data in the database. Finally, add an appendix of all the SQL statements created in your application during Phase 4 and a description of the indexes created to boost the performance of your application.
+% \section{Data Analysis}
+% \subsection{Hypothesis}
+% Use this section to state the objectives of your data analysis; what are the observations you are expecting to find. Note that your final
+% observations may end up differing from your proposal, that is also a valid result.
+% \subsection{Data Preprocessing}
+% Use this section to describe the preprocessing steps you have performed to prepare the data for the analytics. Preprocessing steps may include: data cleaning (e.g., filling missing values, fixing outliers), formatting the data (e.g., resolving issues like inconsistent abbreviations, multiples date format in the data), combining or splitting fields, add new information (data enrichness).
 
-Explain how the data was extracted from the database for the analysis; if you used complex queries or views, or both.
-\subsection{Data Analytics \& Visualization}
-Use this section to explain the process/techniques used to analyze the data, use data visualization to present the results, and explain them.
-\subsection{Conclusions}
-Use this section to explain the conclusions drawn from your data analysis.\\
-\section{Lessons Learned}
-Use this section to describe the issues you faced during the project and how you overcame them. Also, describe what you learned during this effort; this section, like the others, plays a critical component in determining your final grade.\\
+% Explain how the data was extracted from the database for the analysis; if you used complex queries or views, or both.
+% \subsection{Data Analytics \& Visualization}
+% Use this section to explain the process/techniques used to analyze the data, use data visualization to present the results, and explain them.
+% \subsection{Conclusions}
+% Use this section to explain the conclusions drawn from your data analysis.\\
+% \section{Lessons Learned}
+% Use this section to describe the issues you faced during the project and how you overcame them. Also, describe what you learned during this effort; this section, like the others, plays a critical component in determining your final grade.\\
 
-{\bf The next subsection is meant to provide you with some help in
-  dealing with figures, tables and references, as these are sometimes
-  hard for folks new to \LaTeX. Your figures and tables
-  may be distributed all over your paper (not just here), as appropriate for your paper.
+% {\bf The next subsection is meant to provide you with some help in
+%   dealing with figures, tables and references, as these are sometimes
+%   hard for folks new to \LaTeX. Your figures and tables
+%   may be distributed all over your paper (not just here), as appropriate for your paper.
 
-  Please delete the following subsection before you make any submissions!}
+%   Please delete the following subsection before you make any submissions!}
 
-\subsection{Tables, Figures, and Citations/References}
+% \subsection{Tables, Figures, and Citations/References}
 
-Tables, figures, and references in technical
-documents need to be presented correctly. As many students
-are not familiar with using these objects, here is a quick
-guide extracted from the ACM style guide.
+% Tables, figures, and references in technical
+% documents need to be presented correctly. As many students
+% are not familiar with using these objects, here is a quick
+% guide extracted from the ACM style guide.
 
-\begin{table}
-\centering
-\caption{Feelings about Issues}
-\label{SAMPLE TABLE}
-\begin{tabular}{|l|r|l|} \hline
-Flavor&Percentage&Comments\\ \hline
-Issue 1 &  10\% & Loved it a lot\\ \hline
-Issue 2 &  20\% & Disliked it immensely\\ \hline
-Issue 3 &  30\% & Didn't care one bit\\ \hline
-Issue 4 &  40\% & Duh?\\ \hline
-\end{tabular}
-\end{table}
+% \begin{table}
+% \centering
+% \caption{Feelings about Issues}
+% \label{SAMPLE TABLE}
+% \begin{tabular}{|l|r|l|} \hline
+% Flavor&Percentage&Comments\\ \hline
+% Issue 1 &  10\% & Loved it a lot\\ \hline
+% Issue 2 &  20\% & Disliked it immensely\\ \hline
+% Issue 3 &  30\% & Didn't care one bit\\ \hline
+% Issue 4 &  40\% & Duh?\\ \hline
+% \end{tabular}
+% \end{table}
 
 
-First, note that figures in the report must be original, that is,
-created by the student: please do not cut-and-paste figures from any
-other paper or report you have read or website. Second, if you do need to include figures,
-they should be handled as demonstrated here. State that
-Figure~\ref{SAMPLE FIGURE} is a simple illustration used in the ACM
-Style sample document. Never refer to the figure below (or above)
-because figures may be placed by \LaTeX{} at any appropriate location
-that can change when you recompile your source $.tex$
-file. Incidentally, in proper technical writing (for reasons beyond
-the scope of this discussion), table captions are above the table and
-figure captions are below the figure. So the truly junk information
-about flavors is shown in Table~\ref{SAMPLE TABLE}.
+% First, note that figures in the report must be original, that is,
+% created by the student: please do not cut-and-paste figures from any
+% other paper or report you have read or website. Second, if you do need to include figures,
+% they should be handled as demonstrated here. State that
+% Figure~\ref{SAMPLE FIGURE} is a simple illustration used in the ACM
+% Style sample document. Never refer to the figure below (or above)
+% because figures may be placed by \LaTeX{} at any appropriate location
+% that can change when you recompile your source $.tex$
+% file. Incidentally, in proper technical writing (for reasons beyond
+% the scope of this discussion), table captions are above the table and
+% figure captions are below the figure. So the truly junk information
+% about flavors is shown in Table~\ref{SAMPLE TABLE}.
 
-\begin{figure}[htb]
-\begin{center}
-\includegraphics[width=1.5in]{images/fly.jpg}
-\caption{A sample black \& white graphic (JPG).}
-\label{SAMPLE FIGURE}
-\end{center}
-\end{figure}
+% \begin{figure}[htb]
+% \begin{center}
+% \includegraphics[width=1.5in]{images/fly.jpg}
+% \caption{A sample black \& white graphic (JPG).}
+% \label{SAMPLE FIGURE}
+% \end{center}
+% \end{figure}
 
-\section{Resources}
-Include in this section the resources you have used in your project beyond the normal code development such as data sets or data analytic tools (i.e. Weka, R).
+% \section{Resources}
+% Include in this section the resources you have used in your project beyond the normal code development such as data sets or data analytic tools (i.e. Weka, R).
 \end{document}
