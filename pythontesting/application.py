@@ -79,8 +79,14 @@ def login():
     user = curs.fetchone()
     
     if user:
-        print("Welcome " + user[2]) # username
         logged_in = True
+        curs.execute() # TODO: SQL state to retrieve followers and following
+        info = curs.fetchone()
+        followers = str(info[0])
+        following = str(info[1])
+        print("Welcome " + user[2]) # username
+        print("You have " + followers + " followers")
+        print("You are following " + following + " people")
     else:
         print("Invalid email or password")
 
