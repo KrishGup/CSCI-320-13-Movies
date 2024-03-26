@@ -49,6 +49,8 @@ def main(cursor, connection):
                 delete_collection()
             elif command == "follow":
                 follow()
+            elif command == "unfollow":
+                unfollow()
             else:
                 print("Invalid command")
                 help()
@@ -86,6 +88,18 @@ def follow():
         curs.execute("INSERT INTO follows (followeruid, followeduid) VALUES (%s, %s)", (userId, user[0]))
         conn.commit()
         print("You are now following " + user[2])
+    else:
+        print("User not found")
+
+def unfollow():
+    print("Unfollow user")
+    useremail = input("Enter the email of the user you want to unfollow: ")
+    curs.execute("SELECT * FROM movie_lover WHERE uemail = %s", (useremail,))
+    user = curs.fetchone()
+    if user:
+        curs.execute("DELETE FROM follows WHERE followeruid = %s and followeduid = %s", (userId, user[0]))
+        conn.commit()
+        print("You are no longer following " + user[2])
     else:
         print("User not found")
 
