@@ -5,35 +5,39 @@ import os
 import psycopg2
 
 logged_in = False
+is_admin = False # not sure if we need this but just in case
 curs = None
 conn = None
+userId = "" # probably a better way then to store this globally
 
 def main(cursor, connection):
-    global curs, conn, logged_in
+    global curs, conn, logged_in, userId
     curs = cursor
     conn = connection
     print("Welcome to the Movies Application")
-    while not logged_in:
-        command = input("Would you like to login or create an account? \n > ")
-        if command == "login":
-            login()
-        elif command == "create":
-            create()
-        else:
-            print("login - login to your account")
-            print("create - create an account")
-    while logged_in:
-        command = input("Enter a command \n > ")
-        if command == "logout":
-            logged_in = False
-            print("Logged out")
-        elif command == "help":
-            help()
-        elif command == "exit":
-            sys.exit()
-        else:
-            print("Invalid command")
-            help()
+    while True:
+        while not logged_in:
+            command = input("Would you like to login or create an account? \n > ")
+            if command == "login":
+                login()
+            elif command == "create":
+                create()
+            else:
+                print("login - login to your account")
+                print("create - create an account")
+        while logged_in:
+            command = input("Enter a command \n > ")
+            if command == "logout":
+                logged_in = False
+                userId = ""
+                print("Logged out")
+            elif command == "help":
+                help()
+            elif command == "exit":
+                sys.exit()
+            else:
+                print("Invalid command")
+                help()
 
   
 def help():
@@ -65,13 +69,14 @@ def create():
     
 
 def login():
-    global logged_in
+    global logged_in, is_admin, userId
     print("Login")
     email = input('Email: ')
     password = input('password: ')
 
     if email == 'admin' and password == 'password':
         print('admin')
+        is_admin = True
         # do the admin things here
 
     curs.execute("SELECT * FROM movie_lover WHERE uemail = %s AND password = %s", (email, password))
@@ -80,16 +85,21 @@ def login():
     
     if user:
         logged_in = True
-        
+        userId = str(user[0])
+        print("User ID: " + userId)
         print("Welcome " + user[2]) # username
-        # curs.execute() # TODO: SQL state to retrieve followers and following
-        # info = curs.fetchone()
-        # followers = str(info[0])
-        # following = str(info[1])
-        # print("You have " + followers + " followers")
-        # print("You are following " + following + " people")
+        curs.execute("SELECT count(*) from follows where followeduid = %s", (userId, )) # get the number of followers and following
+        info = curs.fetchone()
+        followers =  str(info[0]) if info else "0"
+        curs.execute("SELECT count(*) from follows where followeruid = %s", (userId, )) # get the number of followers and following
+        info = curs.fetchone()
+        following = str(info[0]) if info else "0"
+        print("You have " + followers + " followers")
+        print("You are following " + following + " people")
     else:
         print("Invalid email or password")
+
+
 
 
 if __name__ == "__main__":
