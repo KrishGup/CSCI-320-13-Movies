@@ -29,6 +29,8 @@ def main(cursor, connection):
             print("Logged out")
         elif command == "help":
             help()
+        elif command == "exit":
+            sys.exit()
         else:
             print("Invalid command")
             help()
@@ -40,7 +42,9 @@ def help():
         print("create - create an account")
     else: 
         print("logout - logout of your account")
-        # Implement other commands here
+        print("exit - exit the application")
+        
+        # Add more commands here
 
 
 
@@ -75,8 +79,14 @@ def login():
     user = curs.fetchone()
     
     if user:
-        print("Welcome " + user[2]) # username
         logged_in = True
+        curs.execute() # TODO: SQL state to retrieve followers and following
+        info = curs.fetchone()
+        followers = str(info[0])
+        following = str(info[1])
+        print("Welcome " + user[2]) # username
+        print("You have " + followers + " followers")
+        print("You are following " + following + " people")
     else:
         print("Invalid email or password")
 
