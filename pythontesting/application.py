@@ -61,7 +61,7 @@ def help():
         print("create_collection - create a collection") # implemented
         print("add - Add movie to collection") # implemented
         print("delete (movieid) from (collection)") # implemented
-        print("delete_collection - (collection)")
+        print("delete_collection - (collection)") # implemented
         print("name_collection - (collection) (name)")
         print("follow (useremail)")
         print("unfollow (useremail)")
@@ -95,12 +95,18 @@ def create_collection():
         curs.execute("INSERT INTO collection (cname, uid) VALUES (%s, %s)", (name, userId))
         conn.commit()
         print("Collection created")
+        
 def delete_collection():
-    name = input("Enter the name of the collection: ")
-    curs.execute("SELECT * FROM collection WHERE uid = %s", (userId,))
+    collectionName = input("Enter the name of the collection: ")
+    curs.execute("SELECT * FROM collection WHERE uid = %s and cname = %s", (userId, collectionName))
     collections = curs.fetchall()
     if not collections:
         print("Collection not found")
+    else:
+        curs.execute("DELETE FROM collection WHERE uid = %s and cname = %s", (userId, collectionName))
+        curs.execute("DELETE FROM contains WHERE cname = %s", (collectionName,))
+        conn.commit()
+        print("Collection deleted")
     
 def add_to_collection():
     print("Add to collection")
