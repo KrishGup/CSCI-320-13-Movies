@@ -9,7 +9,7 @@ curs = None
 conn = None
 
 def main(cursor, connection):
-    global curs, conn
+    global curs, conn, logged_in
     curs = cursor
     conn = connection
     print("Welcome to the Movies Application")
@@ -80,13 +80,14 @@ def login():
     
     if user:
         logged_in = True
-        curs.execute() # TODO: SQL state to retrieve followers and following
-        info = curs.fetchone()
-        followers = str(info[0])
-        following = str(info[1])
+        
         print("Welcome " + user[2]) # username
-        print("You have " + followers + " followers")
-        print("You are following " + following + " people")
+        # curs.execute() # TODO: SQL state to retrieve followers and following
+        # info = curs.fetchone()
+        # followers = str(info[0])
+        # following = str(info[1])
+        # print("You have " + followers + " followers")
+        # print("You are following " + following + " people")
     else:
         print("Invalid email or password")
 
