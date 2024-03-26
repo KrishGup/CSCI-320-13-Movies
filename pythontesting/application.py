@@ -96,6 +96,7 @@ def follow():
             print("You are now following " + user[2])
         except Exception as e:
             print("An error occurred:", e)
+            conn.rollback()
     else:
         print("User not found")
         
@@ -113,6 +114,7 @@ def rate():
             print("Movie rated")
         except Exception as e:
             print("An error occurred:", e)
+            conn.rollback()
     else:
         print("Movie not found")
 
@@ -128,6 +130,7 @@ def unfollow():
             print("You are no longer following " + user[2])
         except Exception as e:
             print("An error occurred:", e)
+            conn.rollback()
     else:
         print("User not found")
 
@@ -154,6 +157,7 @@ def create_collection():
             print("Collection created")
         except Exception as e:
             print("An error occurred:", e)
+            conn.rollback()
         
 def delete_collection():
     collectionName = input("Enter the name of the collection: ")
@@ -169,6 +173,7 @@ def delete_collection():
             print("Collection deleted")
         except Exception as e:
             print("An error occurred:", e)
+            conn.rollback()
     
 def add_to_collection():
     print("Add to collection")
@@ -187,6 +192,7 @@ def add_to_collection():
                 print("Movie added to collection")
             except Exception as e:
                 print("An error occurred:", e)
+                conn.rollback()
         else: 
             print("Collection not found")
     else:
@@ -217,6 +223,7 @@ def remove():
             print("Movie removed from collection")
         except Exception as e:
             print("An error occurred:", e)
+            conn.rollback()
 
 def search():
     print("d - search by director")
@@ -302,6 +309,7 @@ def create():
         login()
     except Exception as e:
         print("An error occurred:", e)
+        conn.rollback()
 
 def login():
     global logged_in, is_admin, userId
