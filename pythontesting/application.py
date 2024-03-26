@@ -1,62 +1,78 @@
-import psycopg2
-from sshtunnel import SSHTunnelForwarder
+import datetime
+import math
+import sys
 import os
-import json
-from movie_lover_ui import *
+import psycopg2
 
-with open('personal_information.json', 'r') as file:
-    data = json.load(file)
+logged_in = False
+curs = None
+conn = None
 
-username = data['username']
-password = data['password']
-dbName = "p320_13"
+def main(cursor, connection):
+    global curs, conn
+    curs = cursor
+    conn = connection
+    print("Welcome to the Movies Application")
+    while not logged_in:
+        command = input("Would you like to login or create an account? \n > ")
+        if command == "login":
+            login()
+        elif command == "create":
+            create()
+        else:
+            print("login - login to your account")
+            print("create - create an account")
+
+  
+def help():
+    if logged_in == False:
+        print("login - login to your account")
+        print("create - create an account")
+    else: 
+        print("logout - logout of your account")
+        # Implement other commands here
 
 
-if True:
-    with SSHTunnelForwarder(('starbug.cs.rit.edu', 22),
-                            ssh_username=username,
-                            ssh_password=password,
-                            remote_bind_address=('127.0.0.1', 5432)) as server:
-        server.start()
-        print("SSH tunnel established")
-        params = {
-            'database': dbName,
-            'user': username,
-            'password': password,
-            'host': 'localhost',
-            'port': server.local_bind_port
-        }
+
+def create():
+    print("\nCreate account")
+    curs.execute("select max(uid) from movie_lover")
+    uid = curs.fetchone()[0] + 1
+    email = input("Email: ")
+    username = input("Username: ")
+    password = input("Password: ")
+    firstname = input("First Name: ")
+    lastname = input("Last Name: ")
+    creationdate = datetime.datetime.now()
+    curs.execute("INSERT INTO movie_lover (uid, uemail, username, password, firstname, lastname, creationdate) VALUES (%s, %s, %s, %s, %s, %s, %s)", (uid, email, username, password, firstname, lastname, creationdate))
+    conn.commit()
+    print("Account created \n\n")
+    login()
+    
+
+def login():
+    print("Login")
+    email = input('Email: ')
+    password = input('password: ')
+
+    if email == 'admin' and password == 'password':
+        print('admin')
+        # do the admin things here
+
+    curs.execute("SELECT * FROM movie_lover WHERE uemail = %s AND password = %s", (email, password))
+
+    user = curs.fetchone()
+    
+    if user:
+        print("Welcome " + user[2]) # username
+        logged_in = True
+    else:
+        print("Invalid email or password")
 
 
-        conn = psycopg2.connect(**params)
-        curs = conn.cursor()
-        print("Database connection established")
-
-        # DB work here....
-        email = input('Email: ')
-        password = input('password: ')
-        email = "user1@example.com"
-        password = "pass123"
-
-        if email == 'admin' and password == 'password':
-            print('admin')
-            # do the admin things here
-
-        curs.execute("SELECT * FROM movie_lover WHERE uemail = %s AND password = %s", (email, password))
-
-        user = curs.fetchone()
-        
-        if user:
-            print(user)
-            uid = user[0]
-            print(uid)
-            movie_lover_ui(uid, conn)
-
-        
-
-        conn.close()
-        
-        
+if __name__ == "__main__":
+    print("run from db_connection.py")
+    
         
 #except:
     #print("Connection failed")
