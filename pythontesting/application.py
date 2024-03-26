@@ -4,10 +4,10 @@ import os
 import json
 from movie_lover_ui import *
 
-with open('../personal_information.json', 'r') as file:
+with open('personal_information.json', 'r') as file:
     data = json.load(file)
 
-username = "sdm9252"
+username = data['username']
 password = data['password']
 dbName = "p320_13"
 
