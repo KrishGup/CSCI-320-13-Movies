@@ -12,7 +12,7 @@ password = data['password']
 dbName = "p320_13"
 
 
-if True:
+try:
     with SSHTunnelForwarder(('starbug.cs.rit.edu', 22),
                             ssh_username=username,
                             ssh_password=password,
@@ -42,14 +42,14 @@ if True:
             print('admin')
             # do the admin things here
 
-        curs.execute("SELECT * FROM movie_lover WHERE uemail = %s AND password = %s", (email, password))
+        curs.execute("SELECT uid FROM movie_lover WHERE uemail = %s AND password = %s", (email, password))
 
         user = curs.fetchone()
         
         if user:
-            print(user)
+            # print(user)
             uid = user[0]
-            print(uid)
+            # print(uid)
             movie_lover_ui(uid, conn)
 
         
@@ -58,8 +58,8 @@ if True:
         
         
         
-#except:
-    #print("Connection failed")
+except:
+    print("Connection failed")
 
 
 
