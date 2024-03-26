@@ -22,6 +22,16 @@ def main(cursor, connection):
         else:
             print("login - login to your account")
             print("create - create an account")
+    while logged_in:
+        command = input("Enter a command \n > ")
+        if command == "logout":
+            logged_in = False
+            print("Logged out")
+        elif command == "help":
+            help()
+        else:
+            print("Invalid command")
+            help()
 
   
 def help():
@@ -51,6 +61,7 @@ def create():
     
 
 def login():
+    global logged_in
     print("Login")
     email = input('Email: ')
     password = input('password: ')
