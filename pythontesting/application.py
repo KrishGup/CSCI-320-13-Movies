@@ -4,11 +4,14 @@ import sys
 import os
 import psycopg2
 
-logged_in = False
+userId = "102"   # for testing purposes
+logged_in = True  # for testing purposes
+
+
 is_admin = False # not sure if we need this but just in case
 curs = None
 conn = None
-userId = "" # probably a better way then to store this globally
+
 
 def main(cursor, connection):
     global curs, conn, logged_in, userId
@@ -68,12 +71,12 @@ def help():
         print("view_collections - view your collections") # implemented
         print("create_collection - create a collection") # implemented
         print("add - Add movie to collection") # implemented
-        print("delete (movieid) from (collection)") # implemented
-        print("delete_collection - (collection)") # implemented
+        print("delete - deletes movie from collection") # implemented
+        print("delete_collection - deletes collection and its contents") # implemented
         print("name_collection - (collection) (name)")
-        print("follow (useremail)") # implemented
-        print("unfollow (useremail)") # implemented
-        print("rate (movieid) (rating)") # implemented
+        print("follow - follow a user") # implemented
+        print("unfollow - unfollow a user") # implemented
+        print("rate - Add a rating to a movie") # implemented
 
         print("watch - (movieid or collection)")
 
@@ -87,23 +90,29 @@ def follow():
     curs.execute("SELECT * FROM movie_lover WHERE uemail = %s", (useremail,))
     user = curs.fetchone()
     if user:
-        curs.execute("INSERT INTO follows (followeruid, followeduid) VALUES (%s, %s)", (userId, user[0]))
-        conn.commit()
-        print("You are now following " + user[2])
+        try:
+            curs.execute("INSERT INTO follows (followeruid, followeduid) VALUES (%s, %s)", (userId, user[0]))
+            conn.commit()
+            print("You are now following " + user[2])
+        except Exception as e:
+            print("An error occurred:", e)
     else:
         print("User not found")
         
         
 def rate():
     print("Rate movie")
-    movieid = input("Enter the movie ID: ")
-    rating = input("Enter the rating: ")
+    movieid = int(input("Enter the movie ID: "))
+    rating = round(float(input("Enter the rating: ")))
     curs.execute("SELECT * FROM movie WHERE mid = %s", (movieid,))
     movie = curs.fetchone()
     if movie:
-        curs.execute("INSERT INTO review (uid, mid, score) VALUES (%s, %s, %s)", (userId, movieid, rating))
-        conn.commit()
-        print("Movie rated")
+        try:
+            curs.execute("INSERT INTO review (uid, mid, score) VALUES (%s, %s, %s)", (userId, movieid, rating))
+            conn.commit()
+            print("Movie rated")
+        except Exception as e:
+            print("An error occurred:", e)
     else:
         print("Movie not found")
 
@@ -113,9 +122,12 @@ def unfollow():
     curs.execute("SELECT * FROM movie_lover WHERE uemail = %s", (useremail,))
     user = curs.fetchone()
     if user:
-        curs.execute("DELETE FROM follows WHERE followeruid = %s and followeduid = %s", (userId, user[0]))
-        conn.commit()
-        print("You are no longer following " + user[2])
+        try:
+            curs.execute("DELETE FROM follows WHERE followeruid = %s and followeduid = %s", (userId, user[0]))
+            conn.commit()
+            print("You are no longer following " + user[2])
+        except Exception as e:
+            print("An error occurred:", e)
     else:
         print("User not found")
 
@@ -136,9 +148,12 @@ def create_collection():
     if name in collections:
         print("You already have a collection with that name")
     else:
-        curs.execute("INSERT INTO collection (cname, uid) VALUES (%s, %s)", (name, userId))
-        conn.commit()
-        print("Collection created")
+        try:
+            curs.execute("INSERT INTO collection (cname, uid) VALUES (%s, %s)", (name, userId))
+            conn.commit()
+            print("Collection created")
+        except Exception as e:
+            print("An error occurred:", e)
         
 def delete_collection():
     collectionName = input("Enter the name of the collection: ")
@@ -147,10 +162,13 @@ def delete_collection():
     if not collections:
         print("Collection not found")
     else:
-        curs.execute("DELETE FROM collection WHERE uid = %s and cname = %s", (userId, collectionName))
-        curs.execute("DELETE FROM contains WHERE cname = %s", (collectionName,))
-        conn.commit()
-        print("Collection deleted")
+        try:
+            curs.execute("DELETE FROM collection WHERE uid = %s and cname = %s", (userId, collectionName))
+            curs.execute("DELETE FROM contains WHERE cname = %s", (collectionName,))
+            conn.commit()
+            print("Collection deleted")
+        except Exception as e:
+            print("An error occurred:", e)
     
 def add_to_collection():
     print("Add to collection")
@@ -163,9 +181,12 @@ def add_to_collection():
         curs.execute("SELECT * FROM collection WHERE uid = %s and cname = %s", (userId, collectionName))
         collections = curs.fetchone()
         if collections:
-            curs.execute("INSERT INTO contains (movieid, cname, uid) VALUES (%s, %s, %s)", (movieid, collectionName, userId))
-            conn.commit()
-            print("Movie added to collection")
+            try:
+                curs.execute("INSERT INTO contains (movieid, cname, uid) VALUES (%s, %s, %s)", (movieid, collectionName, userId))
+                conn.commit()
+                print("Movie added to collection")
+            except Exception as e:
+                print("An error occurred:", e)
         else: 
             print("Collection not found")
     else:
@@ -190,9 +211,12 @@ def remove():
         print("Movie not found")
         exit()
     if movie and collections:
-        curs.execute("DELETE FROM contains WHERE movieid = %s and cname = %s and uid = %s", (movieid, collectionName, userId))
-        conn.commit()
-        print("Movie removed from collection")
+        try:
+            curs.execute("DELETE FROM contains WHERE movieid = %s and cname = %s and uid = %s", (movieid, collectionName, userId))
+            conn.commit()
+            print("Movie removed from collection")
+        except Exception as e:
+            print("An error occurred:", e)
 
 def search():
     print("d - search by director")
@@ -271,11 +295,13 @@ def create():
     firstname = input("First Name: ")
     lastname = input("Last Name: ")
     creationdate = datetime.datetime.now()
-    curs.execute("INSERT INTO movie_lover (uid, uemail, username, password, firstname, lastname, creationdate) VALUES (%s, %s, %s, %s, %s, %s, %s)", (uid, email, username, password, firstname, lastname, creationdate))
-    conn.commit()
-    print("Account created \n\n")
-    login()
-    
+    try:
+        curs.execute("INSERT INTO movie_lover (uid, uemail, username, password, firstname, lastname, creationdate) VALUES (%s, %s, %s, %s, %s, %s, %s)", (uid, email, username, password, firstname, lastname, creationdate))
+        conn.commit()
+        print("Account created \n\n")
+        login()
+    except Exception as e:
+        print("An error occurred:", e)
 
 def login():
     global logged_in, is_admin, userId
