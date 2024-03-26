@@ -51,6 +51,8 @@ def main(cursor, connection):
                 follow()
             elif command == "unfollow":
                 unfollow()
+            elif command == "rate":
+                rate()
             else:
                 print("Invalid command")
                 help()
@@ -71,7 +73,7 @@ def help():
         print("name_collection - (collection) (name)")
         print("follow (useremail)") # implemented
         print("unfollow (useremail)") # implemented
-        print("rate (movieid) (rating)")
+        print("rate (movieid) (rating)") # implemented
 
         print("watch - (movieid or collection)")
 
@@ -90,6 +92,20 @@ def follow():
         print("You are now following " + user[2])
     else:
         print("User not found")
+        
+        
+def rate():
+    print("Rate movie")
+    movieid = input("Enter the movie ID: ")
+    rating = input("Enter the rating: ")
+    curs.execute("SELECT * FROM movie WHERE mid = %s", (movieid,))
+    movie = curs.fetchone()
+    if movie:
+        curs.execute("INSERT INTO review (uid, mid, score) VALUES (%s, %s, %s)", (userId, movieid, rating))
+        conn.commit()
+        print("Movie rated")
+    else:
+        print("Movie not found")
 
 def unfollow():
     print("Unfollow user")
