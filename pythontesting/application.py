@@ -34,7 +34,7 @@ def main(cursor, connection):
             elif command == "help":
                 help()
             elif command == "exit":
-                sys.exit()
+                return
             else:
                 print("Invalid command")
                 help()
@@ -56,7 +56,7 @@ def create():
     print("\nCreate account")
     curs.execute("select max(uid) from movie_lover")
     uid = curs.fetchone()[0] + 1
-    email = input("Email: ")
+    email = input("Email: ").lower()
     username = input("Username: ")
     password = input("Password: ")
     firstname = input("First Name: ")
@@ -71,7 +71,7 @@ def create():
 def login():
     global logged_in, is_admin, userId
     print("Login")
-    email = input('Email: ')
+    email = input('email: ').lower()
     password = input('password: ')
 
     if email == 'admin' and password == 'password':
@@ -88,16 +88,24 @@ def login():
         userId = str(user[0])
         print("User ID: " + userId)
         print("Welcome " + user[2]) # username
-        curs.execute("SELECT count(*) from follows where followeduid = %s", (userId, )) # get the number of followers and following
+        
+        # update access date
+        curs.execute("UPDATE movie_lover SET lastaccess = %s WHERE uid = %s", (datetime.datetime.now(), userId))
+        
+        curs.execute("SELECT count(*) from follows where followeduid = %s", (userId, )) # I don't quite understand why, but that comma is necessary
         info = curs.fetchone()
         followers =  str(info[0]) if info else "0"
-        curs.execute("SELECT count(*) from follows where followeruid = %s", (userId, )) # get the number of followers and following
+        
+        curs.execute("SELECT count(*) from follows where followeruid = %s", (userId, )) # the comma makes it a tuple?
         info = curs.fetchone()
         following = str(info[0]) if info else "0"
+        
         print("You have " + followers + " followers")
         print("You are following " + following + " people")
+        
+        
     else:
-        print("Invalid email or password")
+        print("Invalid email or password\n\n")
 
 
 

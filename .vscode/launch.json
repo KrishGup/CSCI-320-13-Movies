@@ -8,7 +8,7 @@
             "name": "Launch Application",
             "type": "debugpy",
             "request": "launch",
-            "program": "db_connection.py",
+            "program": "pythontesting/db_connection.py",
             "console": "integratedTerminal"
         }
     ]
