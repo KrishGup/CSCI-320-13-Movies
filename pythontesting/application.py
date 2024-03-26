@@ -45,6 +45,10 @@ def main(cursor, connection):
                 remove()
             elif command == "search":
                 search()
+            elif command == "delete_collection":
+                delete_collection()
+            elif command == "follow":
+                follow()
             else:
                 print("Invalid command")
                 help()
@@ -63,7 +67,7 @@ def help():
         print("delete (movieid) from (collection)") # implemented
         print("delete_collection - (collection)") # implemented
         print("name_collection - (collection) (name)")
-        print("follow (useremail)")
+        print("follow (useremail)") # implemented
         print("unfollow (useremail)")
         print("rate (movieid) (rating)")
 
@@ -73,7 +77,17 @@ def help():
         
         # Add more commands here
 
-
+def follow():
+    print("Follow user")
+    useremail = input("Enter the email of the user you want to follow: ")
+    curs.execute("SELECT * FROM movie_lover WHERE uemail = %s", (useremail,))
+    user = curs.fetchone()
+    if user:
+        curs.execute("INSERT INTO follows (followeruid, followeduid) VALUES (%s, %s)", (userId, user[0]))
+        conn.commit()
+        print("You are now following " + user[2])
+    else:
+        print("User not found")
 
 def view_collections():
     print("View collections")
