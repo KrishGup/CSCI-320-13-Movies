@@ -29,6 +29,8 @@ def main(cursor, connection):
             print("Logged out")
         elif command == "help":
             help()
+        elif command == "exit":
+            sys.exit()
         else:
             print("Invalid command")
             help()
@@ -40,7 +42,9 @@ def help():
         print("create - create an account")
     else: 
         print("logout - logout of your account")
-        # Implement other commands here
+        print("exit - exit the application")
+        
+        # Add more commands here
 
 
 
