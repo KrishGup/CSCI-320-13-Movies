@@ -70,7 +70,7 @@ def help():
         print("delete_collection - (collection)") # implemented
         print("name_collection - (collection) (name)")
         print("follow (useremail)") # implemented
-        print("unfollow (useremail)")
+        print("unfollow (useremail)") # implemented
         print("rate (movieid) (rating)")
 
         print("watch - (movieid or collection)")
