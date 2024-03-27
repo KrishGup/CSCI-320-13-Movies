@@ -42,6 +42,8 @@ def main(cursor, connection):
                 view_collections()
             elif command == "create_collection":
                 create_collection()
+            elif command == "name_collection":
+                name_collection()
             elif command == "add":
                 add_to_collection()
             elif command == "delete":
@@ -68,8 +70,7 @@ def help():
     else: 
         print("logout - logout of your account") # implemented
         print("exit - exit the application") # implemented - confirmed working
-        print("view_collections - view your collections") # implemented added total runtimes
-        print("open - show a collections contents")
+        print("view_collections - view your collections") # implemented
         print("create_collection - create a collection") # implemented
         print("add - Add movie to collection") # implemented
         print("delete - deletes movie from collection") # implemented
@@ -84,6 +85,23 @@ def help():
         print("search - open the search menu")
         
         # Add more commands here
+
+def name_collection():
+    print("Name collection")
+    collection_name = input("Enter the name of the collection you would like to change: ")
+    curs.execute("SELECT * FROM collection WHERE cname = %s", (collection_name,))
+    collection = curs.fetchone()
+    if collection:
+        try:
+            new_name = input("Enter the new name of the collection: ")
+            curs.execute("UPDATE collection SET cname = %s WHERE cname = %s", (new_name, collection_name,))
+            conn.commit()
+            print("Collection name was changed")
+        except Exception as e:
+            print("An error occurred:", e)
+            conn.rollback()
+    else:
+        print("Collection not found")
 
 def follow():
     print("Follow user")
@@ -137,22 +155,13 @@ def unfollow():
 
 def view_collections():
     print("View collections")
-    try:
-        curs.execute("SELECT * FROM collection WHERE uid = %s", (userId,))
-        collections = curs.fetchall()
-        if collections:
-            for collection in collections:
-                collection_name = collection[0]  # Assuming that collection[0] is the collection name
-                curs.execute("SELECT SUM(m.runtime) as total_runtime FROM contains c JOIN movie m ON c.movieid = m.mid WHERE c.uid = %s AND c.cname = %s GROUP BY c.uid, c.cname;", (userId, collection_name))
-                total_runtime = curs.fetchone()  # Added parentheses to call the method
-                if total_runtime and total_runtime[0] is not None:
-                    print(f"Collection: {collection_name}, Total Runtime: {total_runtime[0]} minutes\n")
-                else:
-                    print(f"Collection: {collection_name} has no movies or runtime is not available.\n")
-        else: 
-            print("You have no collections")
-    except Exception as e:
-        print(f"An error occurred: {e}")
+    curs.execute("SELECT * FROM collection WHERE uid = %s", (userId,))
+    collections = curs.fetchall()
+    if collections:
+        for collection in collections:
+            print(str(collection[0]) + "\n")
+    else: 
+        print("You have no collections")
 
 def create_collection():
     name = input("Enter the name of the collection: ")
@@ -245,29 +254,37 @@ def search():
     if searchtype == "d":
         director = input("Enter the director: ")
 
-        curs.execute("SELECT * FROM movie WHERE mid IN (SELECT mid FROM directs WHERE conid IN (SELECT conid FROM contributor WHERE contributor.contributorname LIKE %s))", (director,))
+        curs.execute("""SELECT * FROM movie
+                        WHERE mid IN (
+                            SELECT mid
+                            FROM directs
+                            WHERE conid IN (
+                                SELECT conid
+                                FROM contributor
+                                WHERE contributor.contributorname LIKE %s
+                            )""", (director,))
         movies = curs.fetchall()
         if movies:
             for movie in movies:
-                print(movie)
+                print(str(movie[0]) + " " + movie[1])
         else:
             print("No movies found")
     elif searchtype == "c":
         cast = input("Enter the cast member: ")
-        curs.execute("SELECT * FROM movie WHERE mid IN (SELECT mid FROM produce WHERE conid IN (SELECT conid FROM contributor WHERE contributor.contributorname LIKE %s))", (cast,))
+        curs.execute("SELECT * FROM movie WHERE mid in SELECT * from produce where conid in select * from contributor where contributor name like %s", (cast,))
         movies = curs.fetchall()
         if movies:
             for movie in movies:
-                print(movie)
+                print(str(movie[0]) + " " + movie[1])
         else:
             print("No movies found")
     elif searchtype == "s":
         studio = input("Enter the studio: ")
-        curs.execute("SELECT * FROM movie WHERE mid IN (SELECT mid from publish where sid IN (select sid from studio where studioname like %s))", (studio,))
+        curs.execute("SELECT * FROM movie WHERE mid in SELECT * from publish where sid in select * from studio where studioname like %s", (studio,))
         movies = curs.fetchall()
         if movies:
             for movie in movies:
-                print(movie)
+                print(str(movie[0]) + " " + movie[1])
         else:
             print("No movies found")
     elif searchtype == "t":
@@ -276,7 +293,7 @@ def search():
         movies = curs.fetchall()
         if movies:
             for movie in movies:
-                print(movie)
+                print(str(movie[0]) + " " + movie[1])
         else:
             print("No movies found")
     elif searchtype == "r":
