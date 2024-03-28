@@ -262,37 +262,29 @@ def search():
     if searchtype == "d":
         director = input("Enter the director: ")
 
-        curs.execute("""SELECT * FROM movie
-                        WHERE mid IN (
-                            SELECT mid
-                            FROM directs
-                            WHERE conid IN (
-                                SELECT conid
-                                FROM contributor
-                                WHERE contributor.contributorname LIKE %s
-                            )""", (director,))
+        curs.execute("SELECT * FROM movie WHERE mid IN (SELECT mid FROM directs WHERE conid IN (SELECT conid FROM contributor WHERE contributor.contributorname LIKE %s))", (director,))
         movies = curs.fetchall()
         if movies:
             for movie in movies:
-                print(str(movie[0]) + " " + movie[1])
+                print(movie)
         else:
             print("No movies found")
     elif searchtype == "c":
         cast = input("Enter the cast member: ")
-        curs.execute("SELECT * FROM movie WHERE mid in SELECT * from produce where conid in select * from contributor where contributor name like %s", (cast,))
+        curs.execute("SELECT * FROM movie WHERE mid IN (SELECT mid FROM produce WHERE conid IN (SELECT conid FROM contributor WHERE contributor.contributorname LIKE %s))", (cast,))
         movies = curs.fetchall()
         if movies:
             for movie in movies:
-                print(str(movie[0]) + " " + movie[1])
+                print(movie)
         else:
             print("No movies found")
     elif searchtype == "s":
         studio = input("Enter the studio: ")
-        curs.execute("SELECT * FROM movie WHERE mid in SELECT * from publish where sid in select * from studio where studioname like %s", (studio,))
+        curs.execute("SELECT * FROM movie WHERE mid IN (SELECT mid from publish where sid IN (select sid from studio where studioname like %s))", (studio,))
         movies = curs.fetchall()
         if movies:
             for movie in movies:
-                print(str(movie[0]) + " " + movie[1])
+                print(movie)
         else:
             print("No movies found")
     elif searchtype == "t":
