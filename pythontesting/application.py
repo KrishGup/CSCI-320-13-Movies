@@ -57,9 +57,9 @@ def main(cursor, connection):
             elif command == "unfollow":
                 unfollow()
             elif command == "watch_movie":
-                unfollow()
+                watch_movie()
             elif command == "watch_collection":
-                unfollow()
+                watch_collection()
             elif command == "rate":
                 rate()
             else:
@@ -73,18 +73,18 @@ def help():
         print("create - create an account") # implemented, Recorded
     else: 
         print("logout - logout of your account") # implemented, Recorded
-        print("exit - exit the application") # implemented - confirmed working
-        print("view_collections - view your collections") # implemented
-        print("create_collection - create a collection") # implemented
-        print("add - Add movie to collection") # implemented
-        print("delete - deletes movie from collection") # implemented
-        print("delete_collection - deletes collection and its contents") # implemented
-        print("name_collection - (collection) (name)") # implemented
-        print("follow - follow a user") # implemented
-        print("unfollow - unfollow a user") # implemented
-        print("rate - Add a rating to a movie") # implemented
+        print("exit - exit the application") # implemented - confirmed working, Recorded
+        print("view_collections - view your collections") # implemented, Recorded, not working, probably should rerecord
+        print("create_collection - create a collection") # implemented, Recorded
+        print("add - Add movie to collection") # implemented, Recorded
+        print("delete - deletes movie from collection") # implemented, Recorded
+        print("delete_collection - deletes collection and its contents") # implemented, Recorded
+        print("name_collection - (collection) (name)") # implemented, Recorded
+        print("follow - follow a user") # implemented, Recorded
+        print("unfollow - unfollow a user") # implemented, Recorded
+        print("rate - Add a rating to a movie") # implemented, Recorded
 
-        print("watch_movie - watch a movie")
+        print("watch_movie - watch a movie") 
         print("watch_collection - watch all movies in a collection")
 
         print("search - open the search menu")
