@@ -397,7 +397,7 @@ def login():
         
         # update access date
         curs.execute("UPDATE movie_lover SET lastaccess = %s WHERE uid = %s", (datetime.datetime.now(), userId))
-        curs.commit() 
+        conn.commit() 
         curs.execute("SELECT count(*) from follows where followeduid = %s", (userId, )) # I don't quite understand why, but that comma is necessary
         info = curs.fetchone()
         followers =  str(info[0]) if info else "0"
