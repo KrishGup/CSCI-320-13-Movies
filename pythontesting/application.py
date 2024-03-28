@@ -56,6 +56,10 @@ def main(cursor, connection):
                 follow()
             elif command == "unfollow":
                 unfollow()
+            elif command == "watch_movie":
+                unfollow()
+            elif command == "watch_collection":
+                unfollow()
             elif command == "rate":
                 rate()
             else:
@@ -75,12 +79,13 @@ def help():
         print("add - Add movie to collection") # implemented
         print("delete - deletes movie from collection") # implemented
         print("delete_collection - deletes collection and its contents") # implemented
-        print("name_collection - (collection) (name)")
+        print("name_collection - (collection) (name)") 
         print("follow - follow a user") # implemented
         print("unfollow - unfollow a user") # implemented
         print("rate - Add a rating to a movie") # implemented
 
-        print("watch - (movieid or collection)")
+        print("watch_movie - watch a movie")
+        print("watch_collection - watch all movies in a collection")
 
         print("search - open the search menu")
         
@@ -97,6 +102,9 @@ def name_collection():
             curs.execute("UPDATE collection SET cname = %s WHERE cname = %s", (new_name, collection_name,))
             conn.commit()
             print("Collection name was changed")
+            curs.execute("SELECT * FROM contains WHERE cname = %s", (collection_name,))
+            contains_collections = curs.fetchall()
+            
         except Exception as e:
             print("An error occurred:", e)
             conn.rollback()
