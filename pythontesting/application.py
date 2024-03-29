@@ -4,8 +4,8 @@ import sys
 import os
 import psycopg2
 
-userId = ""   # for testing purposes set to int
-logged_in = False  # for testing purposes set to True
+userId = "102"   # for testing purposes set to int
+logged_in = True  # for testing purposes set to True
 
 
 is_admin = False # not sure if we need this but just in case
@@ -74,7 +74,7 @@ def help():
     else: 
         print("logout - logout of your account") # implemented, Recorded
         print("exit - exit the application") # implemented - confirmed working, Recorded
-        print("view_collections - view your collections") # implemented, Recorded, not working, probably should rerecord
+        print("view_collections - view your collections") # implemented, Recorded, working
         print("create_collection - create a collection") # implemented, Recorded
         print("add - Add movie to collection") # implemented, Recorded
         print("delete - deletes movie from collection") # implemented, Recorded
@@ -84,8 +84,8 @@ def help():
         print("unfollow - unfollow a user") # implemented, Recorded
         print("rate - Add a rating to a movie") # implemented, Recorded
 
-        print("watch_movie - watch a movie") 
-        print("watch_collection - watch all movies in a collection")
+        print("watch_movie - watch a movie") # Fixed, Working
+        print("watch_collection - watch all movies in a collection") # Fixed, working
 
         print("search - open the search menu")
         
@@ -167,15 +167,15 @@ def unfollow():
 def view_collections():
     print("View collections")
     try:
-        curs.execute("SELECT * FROM collection WHERE uid = %s", (userId,))
+        curs.execute("SELECT * FROM collection WHERE uid = %s ORDER BY cname", (userId,))
         collections = curs.fetchall()
         if collections:
             for collection in collections:
                 collection_name = collection[0]
-                curs.execute("SELECT SUM(m.runtime) as total_runtime FROM contains c JOIN movie m ON c.movieid = m.mid WHERE c.uid = %s AND c.cname = %s GROUP BY c.uid, c.cname;", (userId, collection_name))
-                total_runtime = curs.fetchone()
-                if total_runtime and total_runtime[0] is not None:
-                    print(f"Collection: {collection_name}, Total Runtime: {total_runtime[0]} minutes\n")
+                curs.execute("SELECT COUNT(m.mid), SUM(m.runtime) as total_runtime FROM contains c JOIN movie m ON c.movieid = m.mid WHERE c.uid = %s AND c.cname = %s GROUP BY c.uid, c.cname;", (userId, collection_name))
+                count_and_runtime = curs.fetchone()
+                if count_and_runtime and count_and_runtime[0] is not None and count_and_runtime[1] is not None:
+                    print(f"Collection: {collection_name}, Total Runtime: {count_and_runtime[1]} minutes, Number of Movies: {count_and_runtime[0]}\n")
                 else:
                     print(f"Collection: {collection_name} has no movies or runtime is not available.\n")
         else: 
@@ -270,13 +270,13 @@ def watch_movie():
     curs.execute("SELECT * FROM movie WHERE mid = %s", (movieid,))
     movie = curs.fetchone()
     if movie:
-        print("Movie found")
+        print("Movie found ", movie)
     else:
         print("Movie not found")
         exit()
     try:
         watchdate = datetime.datetime.now()
-        curs.execute("INSERT INTO watch (movieid, cname, uid) VALUES = (%s, ", (movieid, watchdate, userId,))
+        curs.execute("INSERT INTO watch (uid, mid, watchtime) VALUES (%s, %s, %s)", (userId, movieid, watchdate))
         conn.commit()
         print("Movie watched!")
     except Exception as e:
@@ -285,13 +285,13 @@ def watch_movie():
 
 def watch_collection():
     cname = input("Enter a collection name: ")
-    curs.execute("SELECT mid FROM contains WHERE uid = %s, cname = %s", (userId,cname,))
+    curs.execute("SELECT movieid FROM contains WHERE uid = %s AND cname = %s", (userId,cname,))
     movies = curs.fetchall()
     watchdate = datetime.datetime.now()
     
     for movie in movies:
         try:
-            curs.execute("INSERT INTO watch (movieid, cname, uid) VALUES = (%s, ", (movie[0], watchdate, userId,))
+            curs.execute("INSERT INTO watch (mid, watchtime, uid) VALUES (%s, %s, %s)", (movie[0], watchdate, userId,))
             conn.commit()
             print("Movie watched!")
         except Exception as e:
@@ -343,13 +343,71 @@ def search():
     
 
     if movies:
+        moviesandrelease = []
+        print("(movieid, rating, runtime, title, release date)")
         for movie in movies:
-            curs.execute("SELECT releasedate FROM host WHERE mid = %s",(movie[0]))
+            curs.execute("SELECT releasedate FROM host WHERE mid = %s",(movie[0],))
             releasedate = curs.fetchone()
-            moviesandrelease = (movie[0], movie[1], movie[2], movie[3], releasedate[0])
+            moviesandrelease.append((movie[0], movie[1], movie[2], movie[3], releasedate[0]))
+
+        moviesandrelease.sort()
+
+        moviesandrelease = sorted(moviesandrelease, key = lambda x: x[3]) # sort by title
 
         for movie in moviesandrelease:
-            print(movie)
+            print(str(movie[0]) + ', ' + str(movie[1])+ ', ' + str(movie[2])+ ', ' + str(movie[3]) + ', ', str(movie[4]))
+
+        print("would you like to sort your query? (it is already sorted by movie name)")
+        print("n - no")
+        print("s - studio")
+        print("g - genre")
+        print("d - date")
+        sortType = input("> ")
+
+        moviesandrelease_sorted = []
+        if sortType == "d":
+            print("(relase date, rating, runtime, title, movie id")
+            moviesandrelease_sorted = sorted(moviesandrelease, key = lambda x: x[4])
+            for movie in moviesandrelease_sorted:
+                print(str(movie[4]) + ', ' + str(movie[1])+ ', ' + str(movie[2])+ ', ' + str(movie[3]) + ', ', str(movie[0]))
+
+        elif sortType == "s":
+            print("(studio, movieid, rating, runtime, title, release date")
+            
+            for movie in moviesandrelease:
+                curs.execute("SELECT studioname FROM studio WHERE sid IN (SELECT sid FROM publish where mid = %s)", (movie[0],))
+                
+                studioname = curs.fetchone()
+                if studioname:
+                    moviesandrelease_sorted.append((studioname[0], movie[0], movie[1], movie[2], movie[3], movie[4]))
+            
+            moviesandrelease_sorted = sorted(moviesandrelease_sorted, key=lambda x: x[0])
+            for movie in moviesandrelease_sorted:
+                print(str(movie[0]) + ', ' + str(movie[1])+ ', ' + str(movie[2])+ ', ' + str(movie[3]) + ', ', str(movie[4])+ ', ', str(movie[4]))
+
+        elif sortType == "g":
+            print("(genre, movieid, rating, runtime, title, release date")
+            
+            for movie in moviesandrelease:
+                curs.execute("SELECT genrename FROM genre WHERE gid IN (SELECT gid FROM moviegenre where mid = %s)", (movie[0],))
+                genre = curs.fetchone()[0]
+                moviesandrelease_sorted.append((genre, movie[0], movie[1], movie[2], movie[3], movie[4]))
+            
+            moviesandrelease_sorted = sorted(moviesandrelease_sorted, key=lambda x: x[0])
+            for movie in moviesandrelease_sorted:
+                print(str(movie[0]) + ', ' + str(movie[1])+ ', ' + str(movie[2])+ ', ' + str(movie[3]) + ', ', str(movie[4])+ ', ', str(movie[4]))
+
+
+
+
+        
+
+
+
+        
+
+        
+
     else:
         print("No movies found")
 
