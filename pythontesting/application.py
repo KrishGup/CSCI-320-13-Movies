@@ -344,18 +344,18 @@ def search():
 
     if movies:
         moviesandrelease = []
-        print("(movieid, rating, runtime, title, release date)")
+        print("(movieid, rating, runtime, title, user rating)")
         for movie in movies:
             curs.execute("SELECT releasedate FROM host WHERE mid = %s",(movie[0],))
             releasedate = curs.fetchone()
-            moviesandrelease.append((movie[0], movie[1], movie[2], movie[3], releasedate[0]))
+            moviesandrelease.append((movie[0], movie[1], movie[2], movie[3], movie[4], releasedate[0]))
 
         moviesandrelease.sort()
 
         moviesandrelease = sorted(moviesandrelease, key = lambda x: x[3]) # sort by title
 
         for movie in moviesandrelease:
-            print(str(movie[0]) + ', ' + str(movie[1])+ ', ' + str(movie[2])+ ', ' + str(movie[3]) + ', ', str(movie[4]))
+            print(str(movie[0]) + ', ' + str(movie[1])+ ', ' + str(movie[2])+ ', ' + str(movie[3]) + ', ', str(movie[4]), )
 
         print("would you like to sort your query? (it is already sorted by movie name)")
         print("n - no")
@@ -372,7 +372,7 @@ def search():
                 print(str(movie[4]) + ', ' + str(movie[1])+ ', ' + str(movie[2])+ ', ' + str(movie[3]) + ', ', str(movie[0]))
 
         elif sortType == "s":
-            print("(studio, movieid, rating, runtime, title, release date")
+            print("(studio, movieid, rating, runtime, title, release date)")
             
             for movie in moviesandrelease:
                 curs.execute("SELECT studioname FROM studio WHERE sid IN (SELECT sid FROM publish where mid = %s)", (movie[0],))
