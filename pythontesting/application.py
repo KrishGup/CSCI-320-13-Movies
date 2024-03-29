@@ -175,7 +175,8 @@ def view_collections():
                 curs.execute("SELECT COUNT(m.mid), SUM(m.runtime) as total_runtime FROM contains c JOIN movie m ON c.movieid = m.mid WHERE c.uid = %s AND c.cname = %s GROUP BY c.uid, c.cname;", (userId, collection_name))
                 count_and_runtime = curs.fetchone()
                 if count_and_runtime and count_and_runtime[0] is not None and count_and_runtime[1] is not None:
-                    print(f"Collection: {collection_name}, Total Runtime: {count_and_runtime[1]} minutes, Number of Movies: {count_and_runtime[0]}\n")
+                    hours, minutes = divmod(count_and_runtime[1], 60)
+                    print(f"Collection: {collection_name}, Total Runtime: {hours} hours {minutes} minutes, Number of Movies: {count_and_runtime[0]}\n")
                 else:
                     print(f"Collection: {collection_name} has no movies or runtime is not available.\n")
         else: 
