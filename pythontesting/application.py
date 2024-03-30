@@ -4,8 +4,8 @@ import sys
 import os
 import psycopg2
 
-userId = "102"   # for testing purposes set to int
-logged_in = True  # for testing purposes set to True
+userId = ""   # for testing purposes set to int
+logged_in = False  # for testing purposes set to True
 
 
 is_admin = False # not sure if we need this but just in case
@@ -343,20 +343,36 @@ def search():
         search()
     
 
+ 
+
+
+
+
     if movies:
         moviesandrelease = []
-        print("(movieid, rating, runtime, title, user rating)")
+        print("(movieid, rating, runtime, title, user rating, cast, director)")
         for movie in movies:
-            curs.execute("SELECT releasedate FROM host WHERE mid = %s",(movie[0],))
-            releasedate = curs.fetchone()
-            moviesandrelease.append((movie[0], movie[1], movie[2], movie[3], movie[4], releasedate[0]))
+            # Fetch the director
+            curs.execute("SELECT contributorname FROM contributor WHERE conid IN (SELECT conid FROM directs WHERE mid = %s)", (movie[0],))
+            director = curs.fetchone()
+            director_name = director[0] if director else "Unknown"
+
+            # Fetch the cast
+            curs.execute("SELECT contributorname FROM contributor WHERE conid IN (SELECT conid FROM produce WHERE mid = %s)", (movie[0],))
+            cast = curs.fetchall()
+            cast_list = ", ".join([member[0] for member in cast]) if cast else "Unknown"
+
+            moviesandrelease.append((movie[0], movie[1], movie[2], movie[3], movie[4], cast_list, director_name))
 
         moviesandrelease.sort()
-
-        moviesandrelease = sorted(moviesandrelease, key = lambda x: x[3]) # sort by title
+        moviesandrelease = sorted(moviesandrelease, key = lambda x: x[0]) # sort by movieid
 
         for movie in moviesandrelease:
-            print(str(movie[0]) + ', ' + str(movie[1])+ ', ' + str(movie[2])+ ', ' + str(movie[3]) + ', ', str(movie[4]), )
+            print('Movie ID: ' + str(movie[0]) + ', Rating: ' + str(movie[1]) + ', Runtime: ' + str(movie[2]) + ', Title: ' + movie[3] + ', User Rating: ' + str(movie[4]) + ', Cast: ' + movie[5] + ', Director: ' + movie[6])
+
+
+ 
+
 
         print("would you like to sort your query? (it is already sorted by movie name)")
         print("n - no")
@@ -367,10 +383,12 @@ def search():
 
         moviesandrelease_sorted = []
         if sortType == "d":
-            print("(relase date, rating, runtime, title, movie id")
+            print("(release date, rating, runtime, title, movie id)")
             moviesandrelease_sorted = sorted(moviesandrelease, key = lambda x: x[4])
             for movie in moviesandrelease_sorted:
-                print(str(movie[4]) + ', ' + str(movie[1])+ ', ' + str(movie[2])+ ', ' + str(movie[3]) + ', ', str(movie[0]))
+                curs.execute("SELECT releasedate FROM host WHERE mid = %s", (movie[0],))
+                releasedate = curs.fetchone()
+                print(str(releasedate[0]) + ', ' + str(movie[1])+ ', ' + str(movie[2])+ ', ' + str(movie[3]) + ', ' + str(movie[0]))
 
         elif sortType == "s":
             print("(studio, movieid, rating, runtime, title, release date)")
