@@ -4,8 +4,8 @@ import sys
 import os
 import psycopg2
 
-userId = ""   # for testing purposes set to int
-logged_in = False  # for testing purposes set to True
+userId = "101"   # for testing purposes set to int
+logged_in = True  # for testing purposes set to True
 
 
 is_admin = False # not sure if we need this but just in case
@@ -62,6 +62,8 @@ def main(cursor, connection):
                 watch_collection()
             elif command == "rate":
                 rate()
+            elif command == "profile":
+                profile()
             else:
                 print("Invalid command")
                 help()
@@ -83,6 +85,7 @@ def help():
         print("follow - follow a user") # implemented, Recorded
         print("unfollow - unfollow a user") # implemented, Recorded
         print("rate - Add a rating to a movie") # implemented, Recorded
+        print("profile - display user profile") 
 
         print("watch_movie - watch a movie") # Fixed, Working
         print("watch_collection - watch all movies in a collection") # Fixed, working
@@ -91,6 +94,36 @@ def help():
         
         # Add more commands here
 
+def profile():
+    # The number of collections the user has
+    # – The number of users followed by this user
+    # – The number of users this user is following
+    # – Their top 10 movies (by highest rating, most plays, or combination
+    
+    print("Profile")
+    curs.execute("SELECT COUNT(cname) FROM collection WHERE uid = %s", (userId,))
+    collections = curs.fetchone()
+    print("Number of collections: " + str(collections[0]))
+    curs.execute("SELECT COUNT(followeduid) FROM follows WHERE followeruid = %s", (userId,))
+    followers = curs.fetchone()
+    print("Number of followers: " + str(followers[0]))
+    curs.execute("SELECT COUNT(followeruid) FROM follows WHERE followeduid = %s", (userId,))
+    following = curs.fetchone()
+    print("Number of people you are following: " + str(following[0]))
+    curs.execute("SELECT * FROM review WHERE uid = %s ORDER BY score DESC LIMIT 10", (userId,))
+    top_movies = curs.fetchall()
+    
+    
+    if top_movies:
+        print("Top 10 movies:")
+        for movie in top_movies:
+            curs.execute("SELECT title FROM movie WHERE mid = %s", (movie[1],))
+            title = curs.fetchone()
+            print(title[0] + " - " + str(movie[2]))
+    else:
+        print("You have not rated any movies")
+        
+        
 def name_collection():
     print("Name collection")
     collection_name = input("Enter the name of the collection you would like to change: ")
