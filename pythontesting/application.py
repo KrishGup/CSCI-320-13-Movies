@@ -4,17 +4,22 @@ import sys
 import os
 import psycopg2
 
-userId = "101"   # for testing purposes set to int
-logged_in = True  # for testing purposes set to True
+userId = ""   # for testing purposes set to int
+logged_in = False  # for testing purposes set to True
 
 
 is_admin = False # not sure if we need this but just in case
 curs = None
 conn = None
 
+userIndex = []
+followers = 0
+following = 0
+collections = 0
+
 
 def main(cursor, connection):
-    global curs, conn, logged_in, userId
+    global curs, conn, logged_in, userId, followers, following, collections, userIndex
     curs = cursor
     conn = connection
     print("Welcome to the Movies Application")
@@ -33,6 +38,10 @@ def main(cursor, connection):
             if command == "logout":
                 logged_in = False
                 userId = ""
+                userIndex = []
+                followers = 0
+                following = 0
+                collections = 0
                 print("Logged out")
             elif command == "help":
                 help()
@@ -64,9 +73,54 @@ def main(cursor, connection):
                 rate()
             elif command == "profile":
                 profile()
+            elif command == "recommend":
+                recommend()
             else:
                 print("Invalid command")
                 help()
+                
+                
+def recommend():
+    print("recommend")
+    # The application must provide a movie recommendation system with the following operations
+    # The top 20 most popular movies in the last 90 days (rolling) determined by most watches
+    # The top 20 most popular movies among the people I follow of all time determined by most watches
+    # The top 5 new releases of the month (specify) 
+    userR = input("Would you like to see the top 20 most popular movies in the last 90 days? (y/n) ")
+    if userR == 'y':
+        curs.execute("SELECT mid, COUNT(mid) FROM watch WHERE watchtime > current_date - interval '90 days' GROUP BY mid ORDER BY COUNT(mid) DESC LIMIT 20")
+        movies = curs.fetchall()
+        if movies:
+            for movie in movies:
+                curs.execute("SELECT title FROM movie WHERE mid = %s", (movie[0],))
+                title = curs.fetchone()
+                print(title[0])
+        else:
+            print("No movies found")
+    userR = input("Would you like to see the top 20 most popular movies among the people you follow of all time? (y/n) ")
+    if userR == 'y':
+        curs.execute("SELECT mid, COUNT(mid) FROM watch WHERE uid IN (SELECT followeduid FROM follows WHERE followeruid = %s) GROUP BY mid ORDER BY COUNT(mid) DESC LIMIT 20", (userId,))
+        movies = curs.fetchall()
+        if movies:
+            for movie in movies:
+                curs.execute("SELECT title FROM movie WHERE mid = %s", (movie[0],))
+                title = curs.fetchone()
+                print(title[0])
+        else:
+            print("No movies found")
+    userR = input("Would you like to see the top 5 new releases of the month? (y/n) ")
+    if userR == 'y':
+        month = input("Enter the month (1-12): ")
+        year = input("Enter the year: ")
+        curs.execute("SELECT mid FROM host WHERE releasedate >= %s AND releasedate < %s", (datetime.date(int(year), int(month), 1), datetime.date(int(year), int(month) + 1, 1)))
+        movies = curs.fetchall()
+        if movies:
+            for movie in movies:
+                curs.execute("SELECT title FROM movie WHERE mid = %s", (movie[0],))
+                title = curs.fetchone()
+                print(title[0])
+        else:
+            print("No movies found")
 
   
 def help():
@@ -86,6 +140,7 @@ def help():
         print("unfollow - unfollow a user") # implemented, Recorded
         print("rate - Add a rating to a movie") # implemented, Recorded
         print("profile - display user profile") 
+        print("reccomend - display movie recommendations")
 
         print("watch_movie - watch a movie") # Fixed, Working
         print("watch_collection - watch all movies in a collection") # Fixed, working
@@ -101,27 +156,13 @@ def profile():
     # – Their top 10 movies (by highest rating, most plays, or combination
     
     print("Profile")
-    curs.execute("SELECT COUNT(cname) FROM collection WHERE uid = %s", (userId,))
-    collections = curs.fetchone()
-    print("Number of collections: " + str(collections[0]))
-    curs.execute("SELECT COUNT(followeduid) FROM follows WHERE followeruid = %s", (userId,))
-    followers = curs.fetchone()
-    print("Number of followers: " + str(followers[0]))
-    curs.execute("SELECT COUNT(followeruid) FROM follows WHERE followeduid = %s", (userId,))
-    following = curs.fetchone()
-    print("Number of people you are following: " + str(following[0]))
-    curs.execute("SELECT * FROM review WHERE uid = %s ORDER BY score DESC LIMIT 10", (userId,))
-    top_movies = curs.fetchall()
-    
-    
-    if top_movies:
-        print("Top 10 movies:")
-        for movie in top_movies:
-            curs.execute("SELECT title FROM movie WHERE mid = %s", (movie[1],))
-            title = curs.fetchone()
-            print(title[0] + " - " + str(movie[2]))
-    else:
-        print("You have not rated any movies")
+    print("Number of collections: ", collections)
+    print("Number of followers: ", followers)
+    print("Number of people you are following: ", following)
+    print("Top 10 movies: ")
+    for movie in userIndex:
+        print(movie)
+        
         
         
 def name_collection():
@@ -485,7 +526,7 @@ def create():
         conn.rollback()
 
 def login():
-    global logged_in, is_admin, userId
+    global logged_in, is_admin, userId, followers, following, userIndex, collections
     print("Login")
     email = input('email: ').lower()
     password = input('password: ')
@@ -516,10 +557,23 @@ def login():
         info = curs.fetchone()
         following = str(info[0]) if info else "0"
         
+        curs.execute("SELECT COUNT(cname) FROM collection WHERE uid = %s", (userId,))
+        collections = curs.fetchone()
+        collections = collections[0] if collections else 0
+        
         print("You have " + followers + " followers")
         print("You are following " + following + " people")
         
         
+        
+        curs.execute("SELECT * FROM review WHERE uid = %s ORDER BY score DESC LIMIT 10", (userId,))
+        top_movies = curs.fetchall()
+        
+        if top_movies:
+            for movie in top_movies:
+                curs.execute("SELECT title FROM movie WHERE mid = %s", (movie[1],))
+                title = curs.fetchone()
+                userIndex = userIndex + [title[0] + " - " + str(movie[2])]
     else:
         print("Invalid email or password\n\n")
 
