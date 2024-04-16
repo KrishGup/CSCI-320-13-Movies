@@ -86,6 +86,7 @@ def recommend():
     # The top 20 most popular movies in the last 90 days (rolling) determined by most watches
     # The top 20 most popular movies among the people I follow of all time determined by most watches
     # The top 5 new releases of the month (specify) 
+    # For you: Recommend movies to watch to based on your play history (e.g. genre, cast member, rating) and the play history of similar users
     userR = input("Would you like to see the top 20 most popular movies in the last 90 days? (y/n) ")
     if userR == 'y':
         curs.execute("SELECT mid, COUNT(mid) FROM watch WHERE watchtime > current_date - interval '90 days' GROUP BY mid ORDER BY COUNT(mid) DESC LIMIT 20")
@@ -108,11 +109,12 @@ def recommend():
                 print(title[0])
         else:
             print("No movies found")
+            
     userR = input("Would you like to see the top 5 new releases of the month? (y/n) ")
     if userR == 'y':
         month = input("Enter the month (1-12): ")
         year = input("Enter the year: ")
-        curs.execute("SELECT mid FROM host WHERE releasedate >= %s AND releasedate < %s", (datetime.date(int(year), int(month), 1), datetime.date(int(year), int(month) + 1, 1)))
+        curs.execute("SELECT mid FROM host WHERE releasedate >= %s AND releasedate < %s ORDER BY releasedate DESC LIMIT 5", (datetime.date(int(year), int(month), 1), datetime.date(int(year), int(month) + 1, 1)))
         movies = curs.fetchall()
         if movies:
             for movie in movies:
@@ -121,6 +123,57 @@ def recommend():
                 print(title[0])
         else:
             print("No movies found")
+            
+    userR = input("Would you like to see movies recommended for you? (y/n) ")
+    if userR == 'y':
+        # Find the user's most watched genre
+        curs.execute("SELECT genrename FROM genre WHERE gid IN (SELECT gid FROM moviegenre WHERE mid IN (SELECT mid FROM watch WHERE uid = %s) GROUP BY gid ORDER BY COUNT(mid) DESC LIMIT 1)", (userId,))
+        genre = curs.fetchone()
+        if genre:
+            print("Your most watched genre is " + genre[0])
+            # Find the most watched movies with the same genre from all users
+            curs.execute("SELECT mid FROM watch WHERE mid IN (SELECT mid FROM moviegenre WHERE gid IN (SELECT gid FROM genre WHERE genrename = %s)) GROUP BY mid ORDER BY COUNT(mid) DESC", (genre[0],))
+            movies = curs.fetchall()
+            for movie in movies:
+                # Check if the movie is in the user's watchlist
+                curs.execute("SELECT 1 FROM watch WHERE uid = %s AND mid = %s", (userId, movie[0]))
+                if not curs.fetchone():
+                    # The movie is not in the user's watchlist
+                    curs.execute("SELECT title FROM movie WHERE mid = %s", (movie[0],))
+                    title = curs.fetchone()
+                    print("You might like " + title[0])
+                    break
+            else:
+                print("No recommendations found")
+        else:
+            print("No recommendations found")
+            
+        # Find the user's most watched cast member
+        curs.execute("SELECT contributorname FROM contributor WHERE conid IN (SELECT conid FROM produce WHERE mid IN (SELECT mid FROM watch WHERE uid = %s) GROUP BY conid ORDER BY COUNT(mid) DESC LIMIT 1)", (userId,))
+        cast = curs.fetchone()
+        if cast:
+            print("Your most watched cast member is " + cast[0])
+            # Find the most watched movies with the same cast member from all users
+            curs.execute("SELECT mid FROM watch WHERE mid IN (SELECT mid FROM produce WHERE conid IN (SELECT conid FROM contributor WHERE contributorname = %s)) GROUP BY mid ORDER BY COUNT(mid) DESC", (cast[0],))
+            movies = curs.fetchall()
+            for movie in movies:
+                # Check if the movie is in the user's watchlist
+                curs.execute("SELECT 1 FROM watch WHERE uid = %s AND mid = %s", (userId, movie[0]))
+                if not curs.fetchone():
+                    # The movie is not in the user's watchlist
+                    curs.execute("SELECT title FROM movie WHERE mid = %s", (movie[0],))
+                    title = curs.fetchone()
+                    print("You might like " + title[0])
+                    break
+            else:
+                print("No recommendations found")
+        else:
+            print("No recommendations found")
+            
+            
+        
+        
+    
 
   
 def help():
