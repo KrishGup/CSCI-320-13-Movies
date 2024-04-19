@@ -2,6 +2,7 @@
 This is  true cinema
 
 Authors:
-Zach Brown, Simon Martin, Krish Gupta, Daniel Baek
-... add names here
+Zach Brown, Simon Martin, Krish Gupta, Daniel Baek, Tommy Mills
+
+EER Diagram:
 https://app.diagrams.net/#G1pVXMeueEZAj6A2U95WjUkspsSkXDohos
